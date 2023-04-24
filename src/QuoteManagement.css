@@ -1,0 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.quote-management-container {
+    margin-top: 2rem;
+  }
+  
+  .quote-management-container .MuiDataGrid-root .MuiDataGrid-columnHeaders {
+    background-color: rgb(0, 0, 0);
+    opacity: 0.7;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .quote-management-container .MuiDataGrid-root .MuiDataGrid-columnHeaderTitle {
+    color: white;
+    text-decoration: double;
+  }
+  
+  .quote-card {
+    margin-bottom: 2rem;
+  }
+  
+  .quote-row {
+    display: flex;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 5px;
+    margin-bottom: 10px;
+    padding: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .quote-number {
+    flex: 0 0 50px;
+  }
+  
+  .quote-text {
+    flex: 1;
+  }
+  
+  .quote-list {
+    margin-top: 2rem;
+    width: 90%;
+    max-width: 800px; /* adjust as needed */
+    margin: 0 auto;
+  }
+  
+  .quote-card {
+    z-index: 1;
+  }
+  
+  .quote-management-container button[type="submit"] {
+    background-color: #4caf50;
+    border-color: #4caf50;
+  }
+
+  .quote-chart {
+  width: 90%;
+  max-width: 800px; /* adjust as needed */
+  margin: 0 auto;
+  opacity: 0.8;
+}
+  
+  /* Material-UI Data Grid styles */
+  .MuiDataGrid-root {
+    background-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+  
+  .MuiDataGrid-row {
+    cursor: pointer;
+  }
+  
+  .MuiDataGrid-columnHeaderWrapper {
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .quote-widget {
+    margin: 0 auto;
+    max-width: 350px;
+    padding: 30px;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(5px);
+    box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.5);
+    position: sticky;
+    text-align: center;
+  }
+
+  .quote-widget * {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .quote-widget h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 30px;
+    color: #fff;
+  }
+  
+  .quote-widget input {
+    font-size: 1rem;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    margin-bottom: 10px;
+  }
+  
+  .quote-widget button {
+    font-size: 1rem;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    background-color: #394867;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+  }
+  
+  .quote-widget button:hover {
+    background-color: #293246;
+  }
