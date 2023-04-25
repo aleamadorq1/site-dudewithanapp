@@ -8,6 +8,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import './Login.css'; // Reuse the styles from Login.css
 import './QuoteManagement.css';
+import config from './config';
 
 const QuoteManagement = () => {
   const [quoteText, setQuoteText] = useState('');
@@ -26,14 +27,14 @@ const QuoteManagement = () => {
   };  
 
   const fetchQuotes = async () => {
-    const response = await fetch('https://dudewithanapp.site/api/quote');
+    const response = await fetch(`${config.apiUrl}/quote`);
     const data = await response.json();
     setQuotes(data);
   };
 
   const fetchQuotePrintsData = async (view, year, month) => {
     const endpoint = view === 'Day' ? `printsByDay?year=${year}&month=${month}` : `printsByMonth?year=${year}`;
-    const response = await fetch(`https://dudewithanapp.site/api/quoteprint/${endpoint}`);
+    const response = await fetch(`${config.apiUrl}/quoteprint/${endpoint}`);
     const printdata = await response.json();
   
     let formattedData = [];
@@ -78,12 +79,10 @@ const QuoteManagement = () => {
     ],
   };
   
-  
-  console.log("Graph data:", graphData);
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const response = await fetch('https://dudewithanapp.site/api/quote', {
+    const response = await fetch(`${config.apiUrl}/quote`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

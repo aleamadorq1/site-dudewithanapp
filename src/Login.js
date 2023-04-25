@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Form, Alert } from 'react-bootstrap';
 import './Login.css'; // import the custom stylesheet
+import config from './config';
 
 const Login = ({ onAuthentication }) => { // Change this line to onAuthentication
   const [email, setEmail] = useState('');
@@ -10,7 +11,7 @@ const Login = ({ onAuthentication }) => { // Change this line to onAuthenticatio
   const handleFormSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetch('https://dudewithanapp.site/api/Login', {
+      const response = await fetch(`${config.apiUrl}/Login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
