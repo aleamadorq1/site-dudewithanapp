@@ -12,6 +12,8 @@ import config from './config';
 
 const QuoteManagement = () => {
   const [quoteText, setQuoteText] = useState('');
+  const [secondaryText, setSecondaryText] = useState('');
+  const [QuoteURL, setQuoteURL] = useState('');
   const [quotes, setQuotes] = useState([]);
   const [chartView, setChartView] = useState('Day');
   const [quotePrints, setQuotePrints] = useState([]);
@@ -81,7 +83,7 @@ const QuoteManagement = () => {
   
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+  
     const response = await fetch(`${config.apiUrl}/quote`, {
       method: 'POST',
       headers: {
@@ -89,11 +91,15 @@ const QuoteManagement = () => {
       },
       body: JSON.stringify({
         quoteText: quoteText,
+        secondaryText: secondaryText,
+        Url: QuoteURL
       }),
     });
-
+  
     if (response.ok) {
       setQuoteText('');
+      setSecondaryText('');
+      setQuoteURL('');
       fetchQuotes();
     }
   };
@@ -138,21 +144,44 @@ const QuoteManagement = () => {
     <div className="login-background">
       <Card className="quote-card quote-widget">
         <Card.Body>
-          <Form onSubmit={handleSubmit}>
-            <Form.Group>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                style={{ width: "100%" }}
-                placeholder="Enter quote text"
-                value={quoteText}
-                onChange={(e) => setQuoteText(e.target.value)}
-              />
-            </Form.Group>
-            <Button type="submit" variant="success">
-              <FontAwesomeIcon icon={faPlusSquare} /> Submit Quote
-            </Button>
-          </Form>
+        <Form onSubmit={handleSubmit}>
+        <Form.Group>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            className="quote-input"
+            style={{ width: "100%", borderRadius: "5px" }} // add border-radius property
+            placeholder="Enter quote text"
+            value={quoteText}
+            onChange={(e) => setQuoteText(e.target.value)}
+          />
+        </Form.Group>
+        <Form.Group>
+          <Form.Control
+            type="text"
+            placeholder="Enter secondary text"
+            value={secondaryText}
+            className="quote-input"
+            style={{ borderRadius: "5px" }} // add border-radius property
+            onChange={(e) => setSecondaryText(e.target.value)}
+          />
+        </Form.Group>
+
+        <Form.Group>
+          <Form.Control
+            type="text"
+            placeholder="Enter a URL"
+            value={QuoteURL}
+            className="quote-input"
+            style={{ borderRadius: "5px" }} // add border-radius property
+            onChange={(e) => setQuoteURL(e.target.value)}
+          />
+        </Form.Group>
+
+          <Button type="submit" variant="success">
+            <FontAwesomeIcon icon={faPlusSquare} /> Submit Quote
+          </Button>
+        </Form>
         </Card.Body>
       </Card>
       <Container className="quote-management-container">
