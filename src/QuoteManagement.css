@@ -32,6 +32,7 @@
     padding: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     font-family: 'Inter', sans-serif;
+    font-size: x-small;
   }
   
   .quote-number {
@@ -41,13 +42,22 @@
   .quote-text {
     flex: 1;
   }
+
+  .quote-summary{
+    font-size: x-small;
+    white-space: break-spaces;
+  }
   
   .quote-list {
     margin-top: 2rem;
     width: 90%;
     max-width: 800px; /* adjust as needed */
-    margin: 0 auto;
+   margin: 0 auto;
   }
+
+  .MuiDataGrid-root .MuiDataGrid-cell {
+    white-space:break-spaces;
+  }  
   
   .quote-card {
     z-index: 1;
@@ -71,6 +81,7 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border-radius: 5px;
     margin-bottom: 10px;
+    white-space:break-spaces;
   }
   
   .MuiDataGrid-row {
