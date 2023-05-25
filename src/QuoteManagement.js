@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Container, Row, Col, ButtonGroup } from 'react-bootstrap';
 import { DataGrid } from '@mui/x-data-grid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlusSquare, faChartLine, faChartArea } from '@fortawesome/free-solid-svg-icons';
+import { faPlusSquare, faChartLine, faChartArea, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { Line } from 'react-chartjs-2';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -18,6 +18,7 @@ const QuoteManagement = () => {
   const [chartView, setChartView] = useState('Day');
   const [quotePrints, setQuotePrints] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedQuote, setSelectedQuote] = useState(null);
 
   const getDailyLabels = (date) => {
     const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -108,28 +109,17 @@ const QuoteManagement = () => {
     }
   };
 
-  const columns = [
-    {
-      field: 'quote',
-      headerName: 'Quote',
-      width: 600,
-      flex: 1,
-      renderCell: (params) => {
-        const { creationDate, text, secondaryText } = params.row.quote;
-        const formattedDate = new Date(creationDate).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-        });
-        return (
-          <div>
-            <div className="quote-summary">[{formattedDate}] - [{text}] - [{secondaryText}]</div>
-          </div>
-        );
-      },
-    },
-  ];
-  
+  const handleEdit = (quote) => {
+    // Handle edit functionality
+  };
+
+  const handleDelete = (quote) => {
+    // Handle delete functionality
+  };
+
+  const handleRowClick = (params) => {
+    setSelectedQuote(params.row);
+  };
 
   const formattedQuotes = quotes.map((quote, index) => {
     const { creationDate, quoteText, secondaryText } = quote;
@@ -142,7 +132,6 @@ const QuoteManagement = () => {
       },
     };
   });
-  
 
   const options = {
     scales: {
@@ -170,6 +159,60 @@ const QuoteManagement = () => {
     label: new Date(currentYear, i, 1).toLocaleString('default', { month: 'long' }),
   }));
 
+  const columns = [
+    {
+      field: 'quote',
+      headerName: 'Quote',
+      minWidth: 'max-content',
+      renderCell: (params) => {
+        const { creationDate, text, secondaryText } = params.row.quote;
+        const formattedDate = new Date(creationDate).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        });
+        const spacePadding = (text + formattedDate + secondaryText).length > 100 ? " ".repeat(50) : " ".repeat(220 - (text + formattedDate + secondaryText).length);
+        return (
+          <div>
+            <div className="quote-summary">[{formattedDate}] - [{text}] - [{secondaryText}] {spacePadding} </div>
+          </div>
+        );
+      },
+    },
+    {
+      field: 'edit',
+      headerName: '',
+      minWidth: 20,
+      maxWidth: 30,
+      renderCell: (params) => {
+        if (selectedQuote && selectedQuote.id === params.row.id) {
+          return (
+            <button className="quote-action-button" onClick={() => handleEdit(params.row)}>
+              <FontAwesomeIcon icon={faEdit} />
+            </button>
+          );
+        }
+        return null;
+      },
+    },
+    {
+      field: 'delete',
+      headerName: '',
+      minWidth: 20,
+      maxWidth: 30,
+      renderCell: (params) => {
+        if (selectedQuote && selectedQuote.id === params.row.id) {
+          return (
+            <button className="quote-action-button" onClick={() => handleDelete(params.row)} style={{ backgroundColor: '#ff4444' }} >
+              <FontAwesomeIcon icon={faTrash} />
+            </button>
+          );
+        }
+        return null;
+      },
+    }
+  ];
+
   return (
     <div className="login-background">
       <Card className="quote-card quote-widget">
@@ -180,7 +223,7 @@ const QuoteManagement = () => {
                 as="textarea"
                 rows={3}
                 className="quote-input"
-                style={{ height: '78px', borderRadius: '5px' }}
+                style={{ height: '82px', width:'328px', borderRadius: '5px' }}
                 placeholder="Enter quote text"
                 value={quoteText}
                 onChange={(e) => setQuoteText(e.target.value)}
@@ -221,9 +264,10 @@ const QuoteManagement = () => {
               <DataGrid
                 rows={formattedQuotes}
                 columns={columns}
-                pageSize={5}
+                pageSize={4}
                 autoHeight
                 disableSelectionOnClick
+                onRowClick={handleRowClick}
               />
             </div>
           </Col>
