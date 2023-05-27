@@ -9,6 +9,8 @@ import 'react-datepicker/dist/react-datepicker.css';
 import './Login.css';
 import './QuoteManagement.css';
 import config from './config';
+import QuoteEditModal from './QuoteEditModal';
+
 
 const QuoteManagement = () => {
   const [quoteText, setQuoteText] = useState('');
@@ -19,6 +21,7 @@ const QuoteManagement = () => {
   const [quotePrints, setQuotePrints] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedQuote, setSelectedQuote] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   const getDailyLabels = (date) => {
     const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -86,6 +89,15 @@ const QuoteManagement = () => {
     ],
   };
 
+  useEffect(() => {
+    // Clear form input fields when modal closes
+    if (!showModal) {
+      setQuoteText('');
+      setSecondaryText('');
+      setQuoteURL('');
+    }
+  }, [showModal]);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -109,8 +121,41 @@ const QuoteManagement = () => {
     }
   };
 
-  const handleEdit = (quote) => {
-    // Handle edit functionality
+  const handleEdit = async (quote) => {
+    setSelectedQuote(quote);
+  
+    const response = await fetch(`${config.apiUrl}/quote/${quote.id}`);
+    const quoteData = await response.json();
+  
+    setQuoteText(quoteData.quoteText);
+    setSecondaryText(quoteData.secondaryText);
+    setQuoteURL(quoteData.url); // Update the variable name to lowercase 'l'
+  
+    setShowModal(true);
+  };
+  
+  const handleSave = async () => {
+    const response = await fetch(`${config.apiUrl}/quote/${selectedQuote.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        quoteText: quoteText,
+        secondaryText: secondaryText,
+        url: QuoteURL,
+      }),
+    });
+
+    if (response.ok) {
+      fetchQuotes();
+      setShowModal(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    // Close the modal
+    setShowModal(false);
   };
 
   const handleDelete = (quote) => {
@@ -163,7 +208,7 @@ const QuoteManagement = () => {
     {
       field: 'quote',
       headerName: 'Quote',
-      minWidth: 'max-content',
+      flex: 1,
       renderCell: (params) => {
         const { creationDate, text, secondaryText } = params.row.quote;
         const formattedDate = new Date(creationDate).toLocaleDateString('en-US', {
@@ -171,10 +216,14 @@ const QuoteManagement = () => {
           month: '2-digit',
           day: '2-digit',
         });
-        const spacePadding = (text + formattedDate + secondaryText).length > 100 ? " ".repeat(50) : " ".repeat(220 - (text + formattedDate + secondaryText).length);
+        const spacePadding =
+          (text + formattedDate + secondaryText).length > 100
+            ? ' '.repeat(50)
+            : ' '.repeat(220 - (text + formattedDate + secondaryText).length);
+  
         return (
-          <div>
-            <div className="quote-summary">[{formattedDate}] - [{text}] - [{secondaryText}] {spacePadding} </div>
+          <div className="quote-summary">
+            [{formattedDate}] - [{text}] - [{secondaryText}]
           </div>
         );
       },
@@ -184,6 +233,7 @@ const QuoteManagement = () => {
       headerName: '',
       minWidth: 20,
       maxWidth: 30,
+      resizable: false,
       renderCell: (params) => {
         if (selectedQuote && selectedQuote.id === params.row.id) {
           return (
@@ -200,17 +250,18 @@ const QuoteManagement = () => {
       headerName: '',
       minWidth: 20,
       maxWidth: 30,
+      resizable: false,
       renderCell: (params) => {
         if (selectedQuote && selectedQuote.id === params.row.id) {
           return (
-            <button className="quote-action-button" onClick={() => handleDelete(params.row)} style={{ backgroundColor: '#ff4444' }} >
+            <button className="quote-action-button" onClick={() => handleDelete(params.row)}>
               <FontAwesomeIcon icon={faTrash} />
             </button>
           );
         }
         return null;
       },
-    }
+    },
   ];
 
   return (
@@ -330,6 +381,15 @@ const QuoteManagement = () => {
           </Col>
         </Row>
       </Container>
+      {showModal && (
+        <QuoteEditModal
+          quoteText={quoteText}
+          secondaryText={secondaryText}
+          quoteURL={QuoteURL} // Update the prop name to uppercase 'Q'
+          onCloseModal={handleCloseModal}
+          onSave={handleSave}
+        />
+      )}
     </div>
   );
 };
