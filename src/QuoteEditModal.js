@@ -4,11 +4,19 @@ import './QuoteEdit.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlusSquare } from '@fortawesome/free-solid-svg-icons';
 
-const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, onCloseModal, onSave }) => {
+const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, onCloseModal, onSave, config, fetchQuotes }) => {
   const [modalVisible, setModalVisible] = useState(true);
   const [editedQuoteText, setEditedQuoteText] = useState(quoteText);
   const [editedSecondaryText, setEditedSecondaryText] = useState(secondaryText);
+  const [editedQuoteURL, setEditedQuoteURL] = useState(quoteURL);
   const quoteTextInputRef = useRef(null);
+
+  useEffect(() => {
+    // Update state when props change
+    setEditedQuoteText(quoteText);
+    setEditedSecondaryText(secondaryText);
+    setEditedQuoteURL(quoteURL);
+  }, [quoteText, secondaryText, quoteURL]);
 
   useEffect(() => {
     // Set focus on the quote text input when the modal opens
@@ -21,19 +29,21 @@ const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, onCloseModal, onSa
         onCloseModal();
       }
     };
-
     window.addEventListener('click', handleOutsideClick);
-
     // Clean up the event listener when the component unmounts
     return () => {
       window.removeEventListener('click', handleOutsideClick);
     };
   }, [onCloseModal]);
 
-  const handleSave = () => {
-    // Handle save functionality
-    onSave();
+  const handleSave = async () => {
+    onSave({
+      quoteText: editedQuoteText,
+      secondaryText: editedSecondaryText,
+      quoteURL: editedQuoteURL,
+    });
     setModalVisible(false);
+    fetchQuotes(); // Call fetchQuotes function passed as a prop
   };
 
   const handleCloseModal = () => {
@@ -47,7 +57,7 @@ const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, onCloseModal, onSa
       <div className="modal-content">
         <Card className="modal-card quote-widget">
           <Modal.Body>
-            <Form onSubmit={handleSave}>
+            <Form>
               <Form.Group>
                 <Form.Control
                   as="textarea"
@@ -56,7 +66,7 @@ const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, onCloseModal, onSa
                   style={{ height: '82px', width: '328px', borderRadius: '5px' }}
                   placeholder="Enter quote text"
                   value={editedQuoteText}
-                  onChange={(e) => setEditedQuoteText(e.target.value)}
+                  onChange={(e) => setEditedQuoteText(e.target.value)} // Update editedQuoteText state
                   ref={quoteTextInputRef}
                 />
               </Form.Group>
@@ -66,7 +76,7 @@ const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, onCloseModal, onSa
                   placeholder="Enter secondary text"
                   className="quote-input"
                   value={editedSecondaryText}
-                  onChange={(e) => setEditedSecondaryText(e.target.value)}
+                  onChange={(e) => setEditedSecondaryText(e.target.value)} // Update editedSecondaryText state
                 />
               </Form.Group>
               <Form.Group>
@@ -74,11 +84,11 @@ const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, onCloseModal, onSa
                   type="text"
                   placeholder="Enter a URL"
                   className="quote-input"
-                  value={quoteURL}
-                  onChange={(e) => setQuoteURL(e.target.value)}
+                  value={editedQuoteURL}
+                  onChange={(e) => setEditedQuoteURL(e.target.value)} // Update editedQuoteURL state
                 />
               </Form.Group>
-              <Button type="submit" variant="success">
+              <Button type="button" variant="success" onClick={handleSave}>
                 <FontAwesomeIcon icon={faPlusSquare} /> Save
               </Button>
             </Form>

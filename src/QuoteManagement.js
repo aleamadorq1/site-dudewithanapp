@@ -11,7 +11,6 @@ import './QuoteManagement.css';
 import config from './config';
 import QuoteEditModal from './QuoteEditModal';
 
-
 const QuoteManagement = () => {
   const [quoteText, setQuoteText] = useState('');
   const [secondaryText, setSecondaryText] = useState('');
@@ -22,6 +21,11 @@ const QuoteManagement = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [quoteEdits, setQuoteEdits] = useState(0);
+  const [editedQuoteText, setEditedQuoteText] = useState(quoteText);
+  const [editedSecondaryText, setEditedSecondaryText] = useState(secondaryText);
+  const [editedQuoteURL, setEditedQuoteURL] = useState('');
+  
 
   const getDailyLabels = (date) => {
     const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -74,6 +78,7 @@ const QuoteManagement = () => {
     const year = selectedDate.getFullYear();
     const month = selectedDate.getMonth() + 1;
     fetchQuotePrintsData(chartView, year, month);
+    
   }, [chartView, selectedDate]);
 
   const graphData = {
@@ -90,13 +95,8 @@ const QuoteManagement = () => {
   };
 
   useEffect(() => {
-    // Clear form input fields when modal closes
-    if (!showModal) {
-      setQuoteText('');
-      setSecondaryText('');
-      setQuoteURL('');
-    }
-  }, [showModal]);
+    fetchQuotes();
+  }, [quoteEdits]); // Add quoteEdits as a dependency
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -126,30 +126,30 @@ const QuoteManagement = () => {
   
     const response = await fetch(`${config.apiUrl}/quote/${quote.id}`);
     const quoteData = await response.json();
-  
-    setQuoteText(quoteData.quoteText);
-    setSecondaryText(quoteData.secondaryText);
-    setQuoteURL(quoteData.url); // Update the variable name to lowercase 'l'
-  
+
     setShowModal(true);
+    setEditedQuoteText(quoteData.quoteText);
+    setEditedSecondaryText(quoteData.secondaryText);
+    setEditedQuoteURL(quoteData.url);
   };
   
-  const handleSave = async () => {
+  const handleSave = async (event) => {
     const response = await fetch(`${config.apiUrl}/quote/${selectedQuote.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        quoteText: quoteText,
-        secondaryText: secondaryText,
-        url: QuoteURL,
+        id: selectedQuote.id,
+        quoteText: event.quoteText,
+        secondaryText: event.secondaryText,
+        url: event.quoteURL,
       }),
     });
-
+  
     if (response.ok) {
-      fetchQuotes();
       setShowModal(false);
+      setQuoteEdits((prevEdits) => prevEdits + 1);
     }
   };
 
@@ -158,9 +158,18 @@ const QuoteManagement = () => {
     setShowModal(false);
   };
 
-  const handleDelete = (quote) => {
-    // Handle delete functionality
+  const handleDelete = async (quote) => {
+    const confirmation = window.confirm('Are you sure you want to delete this quote?');
+    if (confirmation) {
+      const response = await fetch(`${config.apiUrl}/quote/${quote.id}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        fetchQuotes(); // Reload the quote list
+      }
+    }
   };
+  
 
   const handleRowClick = (params) => {
     setSelectedQuote(params.row);
@@ -383,11 +392,16 @@ const QuoteManagement = () => {
       </Container>
       {showModal && (
         <QuoteEditModal
-          quoteText={quoteText}
-          secondaryText={secondaryText}
-          quoteURL={QuoteURL} // Update the prop name to uppercase 'Q'
+          quoteText={editedQuoteText ? editedQuoteText : "" } // Pass the editedQuoteText state instead of selectedQuote.text
+          secondaryText={editedSecondaryText} // Pass the editedSecondaryText state instead of selectedQuote.secondaryText
+          quoteURL={editedQuoteURL} // Pass the editedQuoteURL state instead of selectedQuote.url
           onCloseModal={handleCloseModal}
           onSave={handleSave}
+          config={config}
+          fetchQuotes={fetchQuotes}
+          setEditedQuoteText={setEditedQuoteText}
+          setEditedSecondaryText={setEditedSecondaryText}
+          setEditedQuoteURL={setEditedQuoteURL}
         />
       )}
     </div>
