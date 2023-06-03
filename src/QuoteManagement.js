@@ -40,11 +40,34 @@ const QuoteManagement = () => {
     );
   };
 
-  const fetchQuotes = async () => {
-    const response = await fetch(`${config.apiUrl}/quote`);
-    const data = await response.json();
-    setQuotes(data);
-  };
+  const MAX_RETRIES = 10;
+  const RETRY_DELAY_MS = 1000;
+
+    const fetchWithRetries = async (url, options = {}, retries = 0) => {
+      try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        if (retries < MAX_RETRIES) {
+          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+          return fetchWithRetries(url, options, retries + 1);
+        }
+        throw new Error(`Exceeded maximum retries (${MAX_RETRIES}).`);
+      }
+    };
+
+    const fetchQuotes = async () => {
+      try {
+        const data = await fetchWithRetries(`${config.apiUrl}/quote`);
+        setQuotes(data);
+      } catch (error) {
+        console.error('Failed to fetch quotes:', error);
+      }
+    };
 
   const fetchQuotePrintsData = async (view, year, month) => {
     const endpoint = view === 'Day' ? `printsByDay?year=${year}&month=${month}` : `printsByMonth?year=${year}`;
@@ -281,9 +304,9 @@ const QuoteManagement = () => {
             <Form.Group>
               <Form.Control
                 as="textarea"
-                rows={3}
+                rows={4}
                 className="quote-input"
-                style={{ height: '82px', width:'328px', borderRadius: '5px' }}
+                style={{borderRadius: '5px' }}
                 placeholder="Enter quote text"
                 value={quoteText}
                 onChange={(e) => setQuoteText(e.target.value)}

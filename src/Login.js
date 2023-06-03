@@ -3,6 +3,26 @@ import { Button, Form, Alert } from 'react-bootstrap';
 import './Login.css'; // import the custom stylesheet
 import config from './config';
 
+const MAX_RETRIES = 10;
+const RETRY_DELAY_MS = 1000;
+
+const fetchWithRetries = async (url, options = {}, retries = 0) => {
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    if (retries < MAX_RETRIES) {
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+      return fetchWithRetries(url, options, retries + 1);
+    }
+    throw new Error(`Exceeded maximum retries (${MAX_RETRIES}).`);
+  }
+};
+
 const Login = ({ onAuthentication }) => { // Change this line to onAuthentication
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -11,7 +31,7 @@ const Login = ({ onAuthentication }) => { // Change this line to onAuthenticatio
   const handleFormSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetch(`${config.apiUrl}/Login`, {
+      const response = await fetchWithRetries(`${config.apiUrl}/Login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -21,15 +41,9 @@ const Login = ({ onAuthentication }) => { // Change this line to onAuthenticatio
           password: password,
         }),
       });
-  
-      if (response.ok) {
-        console.log('Response status:', response.status);
-        const text = await response.text();
-        console.log('Response text:', text);
-        const data = JSON.parse(text);
-        console.log(data);
-        console.log('Calling onAuthentication');
-        onAuthentication(true); // Call onAuthentication instead of handleSubmit
+
+      if (response.message = 'Sucess') {
+        onAuthentication(true);
       } else {
         setErrorMessage('Invalid email or password');
       }

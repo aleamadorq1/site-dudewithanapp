@@ -61,9 +61,8 @@ const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, onCloseModal, onSa
               <Form.Group>
                 <Form.Control
                   as="textarea"
-                  rows={3}
+                  rows={4}
                   className="quote-input"
-                  style={{ height: '82px', width: '328px', borderRadius: '5px' }}
                   placeholder="Enter quote text"
                   value={editedQuoteText}
                   onChange={(e) => setEditedQuoteText(e.target.value)} // Update editedQuoteText state
