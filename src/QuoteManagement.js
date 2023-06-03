@@ -239,7 +239,7 @@ const QuoteManagement = () => {
   const columns = [
     {
       field: 'quote',
-      headerName: 'Quote',
+      headerName: 'Entries',
       flex: 1,
       renderCell: (params) => {
         const { creationDate, text, secondaryText } = params.row.quote;
@@ -247,15 +247,13 @@ const QuoteManagement = () => {
           year: 'numeric',
           month: '2-digit',
           day: '2-digit',
-        });
-        const spacePadding =
-          (text + formattedDate + secondaryText).length > 100
-            ? ' '.repeat(50)
-            : ' '.repeat(220 - (text + formattedDate + secondaryText).length);
-  
+          hour: 'numeric',
+          minute: 'numeric',
+          hour12: true,
+        });        
         return (
           <div className="quote-summary">
-            [{formattedDate}] - [{text}] - [{secondaryText}]
+            <b>[{formattedDate}]</b> - [{text}] - [{secondaryText}]
           </div>
         );
       },
