@@ -65,6 +65,7 @@ const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, onCloseModal, onSa
                   className="quote-input"
                   placeholder="Enter quote text"
                   value={editedQuoteText}
+                  maxLength={250}
                   onChange={(e) => setEditedQuoteText(e.target.value)} // Update editedQuoteText state
                   ref={quoteTextInputRef}
                 />

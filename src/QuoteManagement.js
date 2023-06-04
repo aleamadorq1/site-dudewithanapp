@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Form, Button, Container, Row, Col, ButtonGroup } from 'react-bootstrap';
+import { Card, Form, Button, Container, Row, Col } from 'react-bootstrap';
 import { DataGrid } from '@mui/x-data-grid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlusSquare, faChartLine, faChartArea, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { Line } from 'react-chartjs-2';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import { faPlusSquare, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import './Login.css';
 import './QuoteManagement.css';
 import config from './config';
@@ -16,9 +13,6 @@ const QuoteManagement = () => {
   const [secondaryText, setSecondaryText] = useState('');
   const [QuoteURL, setQuoteURL] = useState('');
   const [quotes, setQuotes] = useState([]);
-  const [chartView, setChartView] = useState('Day');
-  const [quotePrints, setQuotePrints] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [quoteEdits, setQuoteEdits] = useState(0);
@@ -26,19 +20,6 @@ const QuoteManagement = () => {
   const [editedSecondaryText, setEditedSecondaryText] = useState(secondaryText);
   const [editedQuoteURL, setEditedQuoteURL] = useState('');
   
-
-  const getDailyLabels = (date) => {
-    const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-    return Array.from({ length: daysInMonth }, (_, i) =>
-      new Date(date.getFullYear(), date.getMonth(), i + 1).toLocaleString('default', { weekday: 'short' }) + ` ${i + 1}`
-    );
-  };
-
-  const getMonthlyLabels = (date) => {
-    return Array.from({ length: 12 }, (_, i) =>
-      new Date(date.getFullYear(), i, 1).toLocaleString('default', { month: 'short' })
-    );
-  };
 
   const MAX_RETRIES = 10;
   const RETRY_DELAY_MS = 1000;
@@ -68,54 +49,6 @@ const QuoteManagement = () => {
         console.error('Failed to fetch quotes:', error);
       }
     };
-
-  const fetchQuotePrintsData = async (view, year, month) => {
-    const endpoint = view === 'Day' ? `printsByDay?year=${year}&month=${month}` : `printsByMonth?year=${year}`;
-    const response = await fetch(`${config.apiUrl}/quoteprint/${endpoint}`);
-    const printdata = await response.json();
-
-    let formattedData = [];
-
-    if (view === 'Day') {
-      formattedData = new Array(31).fill(0);
-      printdata.forEach((item) => {
-        const day = new Date(item.date).getDate();
-        formattedData[day - 1] = item.count;
-      });
-    } else {
-      formattedData = new Array(12).fill(0);
-      printdata.forEach((item) => {
-        const month = new Date(item.date).getMonth();
-        formattedData[month] = item.count;
-      });
-    }
-
-    setQuotePrints(formattedData);
-  };
-
-  useEffect(() => {
-    fetchQuotes();
-  }, []);
-
-  useEffect(() => {
-    const year = selectedDate.getFullYear();
-    const month = selectedDate.getMonth() + 1;
-    fetchQuotePrintsData(chartView, year, month);
-    
-  }, [chartView, selectedDate]);
-
-  const graphData = {
-    labels: chartView === 'Day' ? getDailyLabels(selectedDate) : getMonthlyLabels(selectedDate),
-    datasets: [
-      {
-        label: chartView === 'Day' ? 'Prints per Day' : 'Prints per Month',
-        data: quotePrints,
-        backgroundColor: 'rgba(75,192,192,0.4)',
-        borderColor: 'rgba(75,192,192,1)',
-        borderWidth: 1,
-      },
-    ],
-  };
 
   useEffect(() => {
     fetchQuotes();
@@ -210,32 +143,6 @@ const QuoteManagement = () => {
     };
   });
 
-  const options = {
-    scales: {
-      y: {
-        beginAtZero: true,
-      },
-      x: {
-        type: 'category',
-      },
-    },
-  };
-
-  const chartLabels =
-    chartView === 'Day' && selectedDate
-      ? getDailyLabels(selectedDate)
-      : chartView === 'Month' && selectedDate
-      ? getMonthlyLabels(selectedDate)
-      : [];
-
-  const currentYear = new Date().getFullYear();
-  const currentMonth = new Date().getMonth() + 1;
-  const years = Array.from({ length: currentYear - 2021 + 1 }, (_, i) => 2024 + i);
-  const months = Array.from({ length: 12 }, (_, i) => ({
-    value: i + 1,
-    label: new Date(currentYear, i, 1).toLocaleString('default', { month: 'long' }),
-  }));
-
   const columns = [
     {
       field: 'quote',
@@ -261,8 +168,8 @@ const QuoteManagement = () => {
     {
       field: 'edit',
       headerName: '',
-      minWidth: 20,
-      maxWidth: 30,
+      minWidth: 25,
+      maxWidth: 35,
       resizable: false,
       renderCell: (params) => {
         if (selectedQuote && selectedQuote.id === params.row.id) {
@@ -278,8 +185,8 @@ const QuoteManagement = () => {
     {
       field: 'delete',
       headerName: '',
-      minWidth: 20,
-      maxWidth: 30,
+      minWidth: 25,
+      maxWidth: 35,
       resizable: false,
       renderCell: (params) => {
         if (selectedQuote && selectedQuote.id === params.row.id) {
@@ -307,6 +214,7 @@ const QuoteManagement = () => {
                 style={{borderRadius: '5px' }}
                 placeholder="Enter quote text"
                 value={quoteText}
+                maxLength={250}
                 onChange={(e) => setQuoteText(e.target.value)}
               />
             </Form.Group>
@@ -345,69 +253,12 @@ const QuoteManagement = () => {
               <DataGrid
                 rows={formattedQuotes}
                 columns={columns}
-                pageSize={4}
+                pageSize={25}
                 autoHeight
                 disableSelectionOnClick
                 onRowClick={handleRowClick}
               />
             </div>
-          </Col>
-        </Row>
-        <Row>
-          <Col className="mx-auto">
-            <Card className="quote-card quote-widget" style={{ maxWidth: 740 }}>
-              <Card.Header className="quote-header">
-                <ButtonGroup className="mb-3">
-                  <Button
-                    variant="outline-primary"
-                    onClick={() => setChartView('Day')}
-                    active={chartView === 'Day'}
-                    style={{ fontSize: '0.8rem', marginRight: '1rem' }}
-                  >
-                    <FontAwesomeIcon icon={faChartLine} /> Daily
-                  </Button>
-                  <Button
-                    variant="outline-primary"
-                    onClick={() => setChartView('Month')}
-                    active={chartView === 'Month'}
-                    style={{ fontSize: '0.8rem' }}
-                  >
-                    <FontAwesomeIcon icon={faChartArea} /> Monthly
-                  </Button>
-                </ButtonGroup>
-                {chartView === 'Day' && (
-                  <div className="month-select">
-                    <DatePicker
-                      selected={selectedDate}
-                      onChange={(date) => {
-                        setSelectedDate(date);
-                      }}
-                      dateFormat="MMMM yyyy"
-                      showMonthYearPicker
-                      className="form-control"
-                    />
-                  </div>
-                )}
-                {chartView === 'Month' && (
-                  <div className="year-select">
-                    <DatePicker
-                      selected={selectedDate}
-                      onChange={(date) => {
-                        setSelectedDate(date);
-                      }}
-                      dateFormat="yyyy"
-                      showYearPicker
-                      className="form-control"
-                    />
-                  </div>
-                )}
-              </Card.Header>
-              <Card.Body>
-                <div className="quote-chart" style={{ opacity: '0.8' }}>
-                  <Line data={graphData} options={options} />
-                </div>
-              </Card.Body>
-            </Card>
           </Col>
         </Row>
       </Container>

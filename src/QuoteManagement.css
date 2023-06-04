@@ -4,6 +4,9 @@
   width: 90%;
   padding: 10px;
   margin-bottom: 5px;
+  border-width: 1px;
+    border-style: solid;
+    border-color: -internal-light-dark(rgb(118, 118, 118), rgb(133, 133, 133));
 }
 
 .quote-management-container {
@@ -19,6 +22,7 @@
   .quote-management-container .MuiDataGrid-root .MuiDataGrid-columnHeaderTitle {
     color: white;
     text-decoration: double;
+    font-weight: 400;
   }
   
   .quote-card {
@@ -30,7 +34,7 @@
     align-items: center;
     justify-content: space-between;
     background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 5px;
+    border-radius: 10px;
     margin-bottom: 10px;
     padding: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -49,11 +53,13 @@
 
   .quote-summary{
     font-size: x-small;
-    white-space: break-spaces;
+    white-space:pre-wrap;
+    line-height: 1.0;
+    font-weight: 400;
   }
   
   .quote-list {
-    margin-top: 2rem;
+    margin-top: 1rem;
     width: 100%;
     max-width: 800px; /* adjust as needed */
     justify-content: flex-end;
@@ -67,11 +73,6 @@
   .quote-card {
     z-index: 1;
   }
-  
-  .quote-management-container button[type="submit"] {
-    background-color: #4caf50;
-    border-color: #4caf50;
-  }
 
   .quote-chart {
   width: 90%;
@@ -84,7 +85,7 @@
   .MuiDataGrid-root {
     background-color: rgba(255, 255, 255, 0.8);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
+
     margin-bottom: 10px;
     white-space:break-spaces;
   }
@@ -92,6 +93,7 @@
   .MuiDataGrid-row {
     cursor: pointer;
   }
+
   
   .MuiDataGrid-columnHeaderWrapper {
     background-color: rgba(255, 255, 255, 0.8);
