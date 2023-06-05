@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Container, Row, Col } from 'react-bootstrap';
 import { DataGrid } from '@mui/x-data-grid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlusSquare, faEdit, faTrash, faSignature } from '@fortawesome/free-solid-svg-icons';
+import { faPlusSquare, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import './Login.css';
 import './QuoteManagement.css';
 import './Navbar.css';
@@ -201,7 +201,7 @@ const QuoteManagement = () => {
   ];
 
   const navbarButtons = [
-    { text: 'Quotes', icon: null },
+    { text: 'Quotes', icon: null, link:"/QuoteManagement" },
     { text: 'Reports', icon: null, link: "/PrintQuoteReport" },
     { text: 'Log Out', icon: null },
     // Add more buttons as needed

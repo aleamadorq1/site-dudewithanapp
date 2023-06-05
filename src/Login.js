@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Form, Alert } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSignature } from '@fortawesome/free-solid-svg-icons';
 import './Login.css'; // import the custom stylesheet
 import config from './config';
 
@@ -56,7 +58,12 @@ const Login = ({ onAuthentication }) => { // Change this line to onAuthenticatio
   return (
     <div className="login-background">
       <div className="login-widget">
-        <h2>Login</h2>
+      <div className="title-with-icon">
+        <div className="title-icon">
+          <FontAwesomeIcon icon={faSignature} />
+        </div>  <h2>Login</h2>
+      </div>
+      
         <Form onSubmit={handleFormSubmit}>
           <Form.Group controlId="formBasicEmail">
             <Form.Control type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />

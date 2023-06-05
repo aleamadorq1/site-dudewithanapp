@@ -53,3 +53,22 @@ body {
 .login-widget button:hover {
   background-color: #293246;
 }
+
+  .title-icon {
+    padding: 12px;
+    
+    border-radius: 5px;
+    margin-right: 10px;
+    margin-bottom: auto;
+    color: #fff;
+    background-color: #394867;
+    font-size: 30px;
+    display: inline;
+  }
+
+  .title-with-icon{
+    display: flex;
+    align-content: center;
+    align-items: center;
+    height: fit-content;
+  }
