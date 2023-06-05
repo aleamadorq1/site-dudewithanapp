@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Container, Row, Col } from 'react-bootstrap';
 import { DataGrid } from '@mui/x-data-grid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlusSquare, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faPlusSquare, faEdit, faTrash, faSignature } from '@fortawesome/free-solid-svg-icons';
 import './Login.css';
 import './QuoteManagement.css';
+import './Navbar.css';
 import config from './config';
 import QuoteEditModal from './QuoteEditModal';
+import NavbarComponent from './NavbarComponent';
 
 const QuoteManagement = () => {
   const [quoteText, setQuoteText] = useState('');
   const [secondaryText, setSecondaryText] = useState('');
-  const [QuoteURL, setQuoteURL] = useState('');
+  const [quoteURL, setQuoteURL] = useState('');
   const [quotes, setQuotes] = useState([]);
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -19,40 +21,39 @@ const QuoteManagement = () => {
   const [editedQuoteText, setEditedQuoteText] = useState(quoteText);
   const [editedSecondaryText, setEditedSecondaryText] = useState(secondaryText);
   const [editedQuoteURL, setEditedQuoteURL] = useState('');
-  
 
   const MAX_RETRIES = 10;
   const RETRY_DELAY_MS = 1000;
 
-    const fetchWithRetries = async (url, options = {}, retries = 0) => {
-      try {
-        const response = await fetch(url, options);
-        if (!response.ok) {
-          throw new Error(response.statusText);
-        }
-        const data = await response.json();
-        return data;
-      } catch (error) {
-        if (retries < MAX_RETRIES) {
-          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
-          return fetchWithRetries(url, options, retries + 1);
-        }
-        throw new Error(`Exceeded maximum retries (${MAX_RETRIES}).`);
+  const fetchWithRetries = async (url, options = {}, retries = 0) => {
+    try {
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        throw new Error(response.statusText);
       }
-    };
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      if (retries < MAX_RETRIES) {
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+        return fetchWithRetries(url, options, retries + 1);
+      }
+      throw new Error(`Exceeded maximum retries (${MAX_RETRIES}).`);
+    }
+  };
 
-    const fetchQuotes = async () => {
-      try {
-        const data = await fetchWithRetries(`${config.apiUrl}/quote`);
-        setQuotes(data);
-      } catch (error) {
-        console.error('Failed to fetch quotes:', error);
-      }
-    };
+  const fetchQuotes = async () => {
+    try {
+      const data = await fetchWithRetries(`${config.apiUrl}/quote`);
+      setQuotes(data);
+    } catch (error) {
+      console.error('Failed to fetch quotes:', error);
+    }
+  };
 
   useEffect(() => {
     fetchQuotes();
-  }, [quoteEdits]); // Add quoteEdits as a dependency
+  }, [quoteEdits]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -65,7 +66,7 @@ const QuoteManagement = () => {
       body: JSON.stringify({
         quoteText: quoteText,
         secondaryText: secondaryText,
-        Url: QuoteURL,
+        url: quoteURL,
       }),
     });
 
@@ -79,7 +80,7 @@ const QuoteManagement = () => {
 
   const handleEdit = async (quote) => {
     setSelectedQuote(quote);
-  
+
     const response = await fetch(`${config.apiUrl}/quote/${quote.id}`);
     const quoteData = await response.json();
 
@@ -88,7 +89,7 @@ const QuoteManagement = () => {
     setEditedSecondaryText(quoteData.secondaryText);
     setEditedQuoteURL(quoteData.url);
   };
-  
+
   const handleSave = async (event) => {
     const response = await fetch(`${config.apiUrl}/quote/${selectedQuote.id}`, {
       method: 'PUT',
@@ -102,7 +103,7 @@ const QuoteManagement = () => {
         url: event.quoteURL,
       }),
     });
-  
+
     if (response.ok) {
       setShowModal(false);
       setQuoteEdits((prevEdits) => prevEdits + 1);
@@ -110,7 +111,6 @@ const QuoteManagement = () => {
   };
 
   const handleCloseModal = () => {
-    // Close the modal
     setShowModal(false);
   };
 
@@ -121,17 +121,16 @@ const QuoteManagement = () => {
         method: 'DELETE',
       });
       if (response.ok) {
-        fetchQuotes(); // Reload the quote list
+        fetchQuotes();
       }
     }
   };
-  
 
   const handleRowClick = (params) => {
     setSelectedQuote(params.row);
   };
 
-  const formattedQuotes = quotes.map((quote, index) => {
+  const formattedQuotes = quotes.map((quote) => {
     const { creationDate, quoteText, secondaryText } = quote;
     return {
       id: quote.id,
@@ -157,7 +156,7 @@ const QuoteManagement = () => {
           hour: 'numeric',
           minute: 'numeric',
           hour12: true,
-        });        
+        });
         return (
           <div className="quote-summary">
             <b>[{formattedDate}]</b> - [{text}] - [{secondaryText}]
@@ -201,8 +200,16 @@ const QuoteManagement = () => {
     },
   ];
 
+  const navbarButtons = [
+    { text: 'Quotes', icon: null },
+    { text: 'Reports', icon: null, link: "/PrintQuoteReport" },
+    { text: 'Log Out', icon: null },
+    // Add more buttons as needed
+  ];
+
   return (
     <div className="login-background">
+      <NavbarComponent buttons={navbarButtons}/>
       <Card className="quote-card quote-widget">
         <Card.Body>
           <Form onSubmit={handleSubmit}>
@@ -211,7 +218,7 @@ const QuoteManagement = () => {
                 as="textarea"
                 rows={4}
                 className="quote-input"
-                style={{borderRadius: '5px' }}
+                style={{ borderRadius: '5px' }}
                 placeholder="Enter quote text"
                 value={quoteText}
                 maxLength={250}
@@ -228,18 +235,16 @@ const QuoteManagement = () => {
                 onChange={(e) => setSecondaryText(e.target.value)}
               />
             </Form.Group>
-
             <Form.Group>
               <Form.Control
                 type="text"
                 placeholder="Enter a URL"
-                value={QuoteURL}
+                value={quoteURL}
                 className="quote-input"
                 style={{ borderRadius: '5px' }}
                 onChange={(e) => setQuoteURL(e.target.value)}
               />
             </Form.Group>
-
             <Button type="submit" variant="success">
               <FontAwesomeIcon icon={faPlusSquare} /> Submit Quote
             </Button>
@@ -264,9 +269,9 @@ const QuoteManagement = () => {
       </Container>
       {showModal && (
         <QuoteEditModal
-          quoteText={editedQuoteText ? editedQuoteText : "" } // Pass the editedQuoteText state instead of selectedQuote.text
-          secondaryText={editedSecondaryText} // Pass the editedSecondaryText state instead of selectedQuote.secondaryText
-          quoteURL={editedQuoteURL} // Pass the editedQuoteURL state instead of selectedQuote.url
+          quoteText={editedQuoteText ? editedQuoteText : ''}
+          secondaryText={editedSecondaryText}
+          quoteURL={editedQuoteURL}
           onCloseModal={handleCloseModal}
           onSave={handleSave}
           config={config}

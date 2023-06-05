@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Card } from 'react-bootstrap';
+import { Card, Button, ButtonGroup } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChartLine, faChartArea} from '@fortawesome/free-solid-svg-icons';
 import { Line } from 'react-chartjs-2';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import config from './config';
+import NavbarComponent from './NavbarComponent';
 
 
 const PrintQuoteReport = () => {
@@ -67,7 +70,26 @@ const PrintQuoteReport = () => {
     ],
   };
 
+  const options = {
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+      x: {
+        type: 'category',
+      },
+    },
+  };
+  const navbarButtons = [
+    { text: 'Quotes', icon: null, link:"/QuoteManagement" },
+    { text: 'Reports', icon: null, link: "/PrintQuoteReport" },
+    { text: 'Log Out', icon: null },
+    // Add more buttons as needed
+  ];
+
   return (
+    <div>
+    <NavbarComponent buttons={navbarButtons}/>
     <Card className="quote-card quote-widget" style={{ maxWidth: 740 }}>
       <Card.Header className="quote-header">
         <ButtonGroup className="mb-3">
@@ -121,6 +143,7 @@ const PrintQuoteReport = () => {
         </div>
       </Card.Body>
     </Card>
+    </div>
   );
 };
 
