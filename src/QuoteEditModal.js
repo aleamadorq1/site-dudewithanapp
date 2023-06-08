@@ -4,11 +4,12 @@ import './QuoteEdit.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlusSquare } from '@fortawesome/free-solid-svg-icons';
 
-const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, onCloseModal, onSave, config, fetchQuotes }) => {
+const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, isActive, onCloseModal, onSave, config, fetchQuotes }) => {
   const [modalVisible, setModalVisible] = useState(true);
   const [editedQuoteText, setEditedQuoteText] = useState(quoteText);
   const [editedSecondaryText, setEditedSecondaryText] = useState(secondaryText);
   const [editedQuoteURL, setEditedQuoteURL] = useState(quoteURL);
+  const [editedisActive, setEditedIsActive] = useState(isActive);
   const quoteTextInputRef = useRef(null);
 
   useEffect(() => {
@@ -16,7 +17,8 @@ const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, onCloseModal, onSa
     setEditedQuoteText(quoteText);
     setEditedSecondaryText(secondaryText);
     setEditedQuoteURL(quoteURL);
-  }, [quoteText, secondaryText, quoteURL]);
+    setEditedIsActive(isActive)
+  }, [quoteText, secondaryText, quoteURL, isActive]);
 
   useEffect(() => {
     // Set focus on the quote text input when the modal opens
@@ -41,15 +43,10 @@ const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, onCloseModal, onSa
       quoteText: editedQuoteText,
       secondaryText: editedSecondaryText,
       quoteURL: editedQuoteURL,
+      isActive: editedisActive?1:0
     });
     setModalVisible(false);
     fetchQuotes(); // Call fetchQuotes function passed as a prop
-  };
-
-  const handleCloseModal = () => {
-    // Close the modal without saving changes
-    setModalVisible(false);
-    onCloseModal();
   };
 
   return (
@@ -86,6 +83,15 @@ const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, onCloseModal, onSa
                   className="quote-input"
                   value={editedQuoteURL}
                   onChange={(e) => setEditedQuoteURL(e.target.value)} // Update editedQuoteURL state
+                />
+              </Form.Group>
+              <Form.Group>
+                <Form.Check
+                  type="switch"
+                  id="isActiveSwitch"
+                  label="Show in App"
+                  checked={editedisActive}
+                  onChange={(e) => setEditedIsActive(e.target.checked)}
                 />
               </Form.Group>
               <Button type="button" variant="success" onClick={handleSave}>

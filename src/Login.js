@@ -25,27 +25,29 @@ const fetchWithRetries = async (url, options = {}, retries = 0) => {
   }
 };
 
-const Login = ({ onAuthentication }) => { // Change this line to onAuthentication
-  const [email, setEmail] = useState('');
+const Login = ({ onAuthentication }) => { // Change this line to onLogin
+  const [mail, setMail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetchWithRetries(`${config.apiUrl}/Login`, {
+      const response = await fetchWithRetries(`${config.apiAuthUrl}/User/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: email,
+          mail: mail,
           password: password,
         }),
       });
 
-      if (response.message = 'Sucess') {
-        onAuthentication(true);
+      if (response.token !== '') 
+      {
+        localStorage.setItem('authData', JSON.stringify(response));
+        onAuthentication(response);
       } else {
         setErrorMessage('Invalid email or password');
       }
@@ -58,15 +60,16 @@ const Login = ({ onAuthentication }) => { // Change this line to onAuthenticatio
   return (
     <div className="login-background">
       <div className="login-widget">
-      <div className="title-with-icon">
-        <div className="title-icon">
-          <FontAwesomeIcon icon={faSignature} />
-        </div>  <h2>Login</h2>
-      </div>
+        <div className="title-with-icon">
+          <div className="title-icon">
+            <FontAwesomeIcon icon={faSignature} />
+          </div>  
+          <h2>Login</h2>
+        </div>
       
         <Form onSubmit={handleFormSubmit}>
           <Form.Group controlId="formBasicEmail">
-            <Form.Control type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Form.Control type="email" placeholder="Email" value={mail} onChange={(e) => setMail(e.target.value)} />
           </Form.Group>
 
           <Form.Group controlId="formBasicPassword">

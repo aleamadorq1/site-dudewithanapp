@@ -134,6 +134,7 @@
     font-size: 1rem;
     padding: 10px 20px;
     border-radius: 5px;
+    margin-top: 10px;
     border: none;
     background-color: #394867;
     color: #fff;
@@ -141,6 +142,8 @@
     transition: background-color 0.2s ease-in-out;
     border: #293246;
   }
+
+
   
   .quote-widget button:hover {
     background-color: #293246;
@@ -160,3 +163,56 @@
     color: #333;
     cursor: pointer;
   }
+
+
+  input[type="checkbox"] {
+    /* Add if not using autoprefixer */
+    -webkit-appearance: none;
+    /* Remove most all native input styles */
+    appearance: none;
+    /* For iOS < 15 */
+    background-color: var(--form-background);
+    /* Not removed via appearance */
+    margin-right: 10px;
+  
+    font: inherit;
+    color: white;
+    width: 2em;
+    height: 2em;
+    border: 0.1em solid currentColor;
+    border-radius: 0.15em;
+  
+    display: inline-flex;
+    place-content: center;
+  }
+  
+  input[type="checkbox"]::before {
+    content: "";
+    width: 0.65em;
+    height: 0.65em;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+    transform: scale(0);
+    transform-origin: bottom left;
+    transition: 120ms transform ease-in-out;
+    box-shadow: inset 1em 1em var(--form-control-color);
+    /* Windows High Contrast Mode */
+    background-color: CanvasText;
+  }
+  
+  input[type="checkbox"]:checked::before {
+    transform: scale(1);
+  }
+  
+  input[type="checkbox"]:focus {
+    outline: max(2px, 0.15em) solid #293246;
+    outline-offset: max(2px, 0.15em);
+  }
+  
+  .form-switch label{
+    font-size: small;
+  }
+
+  .inactiveColor {
+    color: rgb(187, 174, 138);
+  }
+  

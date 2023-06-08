@@ -13,6 +13,7 @@ const PrintQuoteReport = () => {
   const [chartView, setChartView] = useState('Day');
   const [quotePrints, setQuotePrints] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const authData = JSON.parse(localStorage.getItem('authData') || '{}');
 
   const getDailyLabels = (date) => {
     const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -29,26 +30,43 @@ const PrintQuoteReport = () => {
 
   const fetchQuotePrintsData = async (view, year, month) => {
     const endpoint = view === 'Day' ? `printsByDay?year=${year}&month=${month}` : `printsByMonth?year=${year}`;
-    const response = await fetch(`${config.apiUrl}/quoteprint/${endpoint}`);
-    const printdata = await response.json();
-
-    let formattedData = [];
-
-    if (view === 'Day') {
-      formattedData = new Array(31).fill(0);
-      printdata.forEach((item) => {
-        const day = new Date(item.date).getDate();
-        formattedData[day - 1] = item.count;
-      });
+    const token = authData.token;
+  
+    const response = await fetch(`${config.apiUrl}/quoteprint/${endpoint}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  
+    if (response.ok) {
+      const printdata = await response.json();
+  
+      let formattedData = [];
+  
+      if (view === 'Day') {
+        formattedData = new Array(31).fill(0);
+        printdata.forEach((item) => {
+          const day = new Date(item.date).getDate();
+          formattedData[day - 1] = item.count;
+        });
+      } else {
+        formattedData = new Array(12).fill(0);
+        printdata.forEach((item) => {
+          const month = new Date(item.date).getMonth();
+          formattedData[month] = item.count;
+        });
+      }
+  
+      setQuotePrints(formattedData);
     } else {
-      formattedData = new Array(12).fill(0);
-      printdata.forEach((item) => {
-        const month = new Date(item.date).getMonth();
-        formattedData[month] = item.count;
-      });
+      // Handle error response
+      console.error('Failed to fetch quote prints data:', response.status);
     }
-
-    setQuotePrints(formattedData);
+  };
+  
+  const handleLogout = () => {
+    localStorage.removeItem('authData');
+    window.location.reload();
   };
 
   useEffect(() => {
@@ -82,14 +100,13 @@ const PrintQuoteReport = () => {
   };
   const navbarButtons = [
     { text: 'Quotes', icon: null, link:"/QuoteManagement" },
-    { text: 'Reports', icon: null, link: "/PrintQuoteReport" },
-    { text: 'Log Out', icon: null },
+    { text: 'Reports', icon: null, link: "/PrintQuoteReport" }
     // Add more buttons as needed
   ];
 
   return (
     <div>
-    <NavbarComponent buttons={navbarButtons}/>
+    <NavbarComponent buttons={navbarButtons} onLogout={handleLogout} />
     <Card className="quote-card quote-widget" style={{ maxWidth: 740 }}>
       <Card.Header className="quote-header">
         <ButtonGroup className="mb-3">

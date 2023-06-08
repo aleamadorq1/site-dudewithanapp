@@ -14,37 +14,31 @@ const QuoteManagement = () => {
   const [quoteText, setQuoteText] = useState('');
   const [secondaryText, setSecondaryText] = useState('');
   const [quoteURL, setQuoteURL] = useState('');
+  const [isActive, setIsActive] = useState(true);
   const [quotes, setQuotes] = useState([]);
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [quoteEdits, setQuoteEdits] = useState(0);
   const [editedQuoteText, setEditedQuoteText] = useState(quoteText);
   const [editedSecondaryText, setEditedSecondaryText] = useState(secondaryText);
+  const [editedIsActive, setEditedIsActive] = useState(isActive);
   const [editedQuoteURL, setEditedQuoteURL] = useState('');
+  const authData = JSON.parse(localStorage.getItem('authData') || '{}');
 
-  const MAX_RETRIES = 10;
-  const RETRY_DELAY_MS = 1000;
-
-  const fetchWithRetries = async (url, options = {}, retries = 0) => {
-    try {
-      const response = await fetch(url, options);
-      if (!response.ok) {
-        throw new Error(response.statusText);
-      }
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      if (retries < MAX_RETRIES) {
-        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
-        return fetchWithRetries(url, options, retries + 1);
-      }
-      throw new Error(`Exceeded maximum retries (${MAX_RETRIES}).`);
-    }
-  };
 
   const fetchQuotes = async () => {
     try {
-      const data = await fetchWithRetries(`${config.apiUrl}/quote`);
+      const response = await fetch(`${config.apiUrl}/quote`, {
+        headers: {
+          Authorization: `Bearer ${authData.token}`,
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+  
+      const data = await response.json();
       setQuotes(data);
     } catch (error) {
       console.error('Failed to fetch quotes:', error);
@@ -53,60 +47,90 @@ const QuoteManagement = () => {
 
   useEffect(() => {
     fetchQuotes();
-  }, [quoteEdits]);
+  }, [quoteEdits, authData.token]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('authData');
+    window.location.reload();
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const response = await fetch(`${config.apiUrl}/quote`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        quoteText: quoteText,
-        secondaryText: secondaryText,
-        url: quoteURL,
-      }),
-    });
+    try {
+      const response = await fetch(`${config.apiUrl}/quote`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authData.token}`,
+        },
+        body: JSON.stringify({
+          quoteText: quoteText,
+          secondaryText: secondaryText,
+          url: quoteURL,
+          isActive: isActive ? 1 : 0,
+        }),
+      });
 
-    if (response.ok) {
-      setQuoteText('');
-      setSecondaryText('');
-      setQuoteURL('');
-      fetchQuotes();
+      if (response.ok) {
+        setQuoteText('');
+        setSecondaryText('');
+        setQuoteURL('');
+        setIsActive(true);
+        fetchQuotes();
+      }
+    } catch (error) {
+      console.error('An error occurred while submitting the quote:', error);
     }
   };
 
   const handleEdit = async (quote) => {
     setSelectedQuote(quote);
 
-    const response = await fetch(`${config.apiUrl}/quote/${quote.id}`);
-    const quoteData = await response.json();
+    try {
+      const response = await fetch(`${config.apiUrl}/quote/${quote.id}`, {
+        headers: {
+          Authorization: `Bearer ${authData.token}`,
+        },
+      });
 
-    setShowModal(true);
-    setEditedQuoteText(quoteData.quoteText);
-    setEditedSecondaryText(quoteData.secondaryText);
-    setEditedQuoteURL(quoteData.url);
+      if (response.ok) {
+        const quoteData = await response.json();
+
+        setShowModal(true);
+        setEditedQuoteText(quoteData.quoteText);
+        setEditedSecondaryText(quoteData.secondaryText);
+        setEditedQuoteURL(quoteData.url);
+        setEditedIsActive(quoteData.isActive);
+      }
+    } catch (error) {
+      console.error('An error occurred while fetching the quote for editing:', error);
+    }
   };
 
   const handleSave = async (event) => {
-    const response = await fetch(`${config.apiUrl}/quote/${selectedQuote.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        id: selectedQuote.id,
-        quoteText: event.quoteText,
-        secondaryText: event.secondaryText,
-        url: event.quoteURL,
-      }),
-    });
+    try {
+      const response = await fetch(`${config.apiUrl}/quote/${selectedQuote.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authData.token}`,
+        },
+        body: JSON.stringify({
+          id: selectedQuote.id,
+          quoteText: event.quoteText,
+          secondaryText: event.secondaryText,
+          url: event.quoteURL,
+          isActive: event.isActive,
+        }),
+      });
 
-    if (response.ok) {
-      setShowModal(false);
-      setQuoteEdits((prevEdits) => prevEdits + 1);
+      if (response.ok) {
+        setShowModal(false);
+        setQuoteEdits((prevEdits) => prevEdits + 1);
+      }
+    } catch (error) {
+      console.error('An error occurred while saving the quote:', error);
     }
   };
 
@@ -117,11 +141,18 @@ const QuoteManagement = () => {
   const handleDelete = async (quote) => {
     const confirmation = window.confirm('Are you sure you want to delete this quote?');
     if (confirmation) {
-      const response = await fetch(`${config.apiUrl}/quote/${quote.id}`, {
-        method: 'DELETE',
-      });
-      if (response.ok) {
-        fetchQuotes();
+      try {
+        const response = await fetch(`${config.apiUrl}/quote/${quote.id}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${authData.token}`,
+          },
+        });
+        if (response.ok) {
+          fetchQuotes();
+        }
+      } catch (error) {
+        console.error('An error occurred while deleting the quote:', error);
       }
     }
   };
@@ -131,13 +162,14 @@ const QuoteManagement = () => {
   };
 
   const formattedQuotes = quotes.map((quote) => {
-    const { creationDate, quoteText, secondaryText } = quote;
+    const { creationDate, quoteText, secondaryText, isActive } = quote;
     return {
       id: quote.id,
       quote: {
         creationDate: new Date(creationDate).toISOString(),
         text: quoteText,
         secondaryText: secondaryText,
+        isActive: isActive === 0 ? '[Hidden]' : '',
       },
     };
   });
@@ -148,7 +180,7 @@ const QuoteManagement = () => {
       headerName: 'Entries',
       flex: 1,
       renderCell: (params) => {
-        const { creationDate, text, secondaryText } = params.row.quote;
+        const { creationDate, text, secondaryText, isActive } = params.row.quote;
         const formattedDate = new Date(creationDate).toLocaleDateString('en-US', {
           year: 'numeric',
           month: '2-digit',
@@ -159,7 +191,7 @@ const QuoteManagement = () => {
         });
         return (
           <div className="quote-summary">
-            <b>[{formattedDate}]</b> - [{text}] - [{secondaryText}]
+            <b>[{formattedDate}] <span className="inactiveColor">{isActive}</span></b> - [{text}] - [{secondaryText}]
           </div>
         );
       },
@@ -201,15 +233,14 @@ const QuoteManagement = () => {
   ];
 
   const navbarButtons = [
-    { text: 'Quotes', icon: null, link:"/QuoteManagement" },
-    { text: 'Reports', icon: null, link: "/PrintQuoteReport" },
-    { text: 'Log Out', icon: null },
+    { text: 'Quotes', icon: null, link: '/QuoteManagement' },
+    { text: 'Reports', icon: null, link: '/PrintQuoteReport' },
     // Add more buttons as needed
   ];
 
   return (
     <div className="login-background">
-      <NavbarComponent buttons={navbarButtons}/>
+      <NavbarComponent buttons={navbarButtons} onLogout={handleLogout} />
       <Card className="quote-card quote-widget">
         <Card.Body>
           <Form onSubmit={handleSubmit}>
@@ -245,6 +276,15 @@ const QuoteManagement = () => {
                 onChange={(e) => setQuoteURL(e.target.value)}
               />
             </Form.Group>
+            <Form.Group>
+              <Form.Check
+                type="switch"
+                id="isActiveSwitch"
+                label="Show in App"
+                checked={isActive}
+                onChange={(e) => setIsActive(e.target.checked)}
+              />
+            </Form.Group>
             <Button type="submit" variant="success">
               <FontAwesomeIcon icon={faPlusSquare} /> Submit Quote
             </Button>
@@ -272,6 +312,7 @@ const QuoteManagement = () => {
           quoteText={editedQuoteText ? editedQuoteText : ''}
           secondaryText={editedSecondaryText}
           quoteURL={editedQuoteURL}
+          isActive={editedIsActive}
           onCloseModal={handleCloseModal}
           onSave={handleSave}
           config={config}

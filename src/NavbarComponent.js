@@ -4,7 +4,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignature } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom'; // Import the Link component
 
-const NavbarComponent = ({ buttons }) => {
+const NavbarComponent = ({ buttons, onLogout  }) => {
+    const handleLogout = () => {
+        onLogout(); // Call the logout function from props
+    };
+
+
   return (
     <Navbar bg="transparent" expand="lg" variant="light" className="navbar-transparent">
       <Navbar.Brand className="navbar-icon navbar-transparent">
@@ -18,6 +23,9 @@ const NavbarComponent = ({ buttons }) => {
               {button.text}
             </Link>
           ))}
+          <button className="navbar-button" onClick={handleLogout}>
+            Logout
+          </button>
         </Nav>
       </Navbar.Collapse>
     </Navbar>
