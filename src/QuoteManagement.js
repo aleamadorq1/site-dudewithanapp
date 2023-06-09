@@ -28,7 +28,7 @@ const QuoteManagement = () => {
 
   const fetchQuotes = async () => {
     try {
-      const response = await fetch(`${config.apiUrl}/quote`, {
+      const response = await fetch(`${authData.instanceUrl}/quote`, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
         },
@@ -58,7 +58,7 @@ const QuoteManagement = () => {
     event.preventDefault();
 
     try {
-      const response = await fetch(`${config.apiUrl}/quote`, {
+      const response = await fetch(`${authData.instanceUrl}/quote`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ const QuoteManagement = () => {
     setSelectedQuote(quote);
 
     try {
-      const response = await fetch(`${config.apiUrl}/quote/${quote.id}`, {
+      const response = await fetch(`${authData.instanceUrl}/quote/${quote.id}`, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
         },
@@ -110,7 +110,7 @@ const QuoteManagement = () => {
 
   const handleSave = async (event) => {
     try {
-      const response = await fetch(`${config.apiUrl}/quote/${selectedQuote.id}`, {
+      const response = await fetch(`${authData.instanceUrl}/quote/${selectedQuote.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -142,7 +142,7 @@ const QuoteManagement = () => {
     const confirmation = window.confirm('Are you sure you want to delete this quote?');
     if (confirmation) {
       try {
-        const response = await fetch(`${config.apiUrl}/quote/${quote.id}`, {
+        const response = await fetch(`${authData.instanceUrl}/quote/${quote.id}`, {
           method: 'DELETE',
           headers: {
             Authorization: `Bearer ${authData.token}`,

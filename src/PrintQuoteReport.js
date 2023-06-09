@@ -32,7 +32,7 @@ const PrintQuoteReport = () => {
     const endpoint = view === 'Day' ? `printsByDay?year=${year}&month=${month}` : `printsByMonth?year=${year}`;
     const token = authData.token;
   
-    const response = await fetch(`${config.apiUrl}/quoteprint/${endpoint}`, {
+    const response = await fetch(`${authData.instanceUrl}/quoteprint/${endpoint}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
