@@ -28,7 +28,7 @@ const QuoteManagement = () => {
 
   const fetchQuotes = async () => {
     try {
-      const response = await fetch(`${authData.instanceUrl}/quote`, {
+      const response = await fetch(`${authData.instanceUrl}/quote/all`, {
         headers: {
           Authorization: `Bearer ${authData.token}`,
         },
