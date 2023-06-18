@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Container, Row, Col } from 'react-bootstrap';
 import { DataGrid } from '@mui/x-data-grid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlusSquare, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faPlusSquare, faEdit, faTrash, faLanguage } from '@fortawesome/free-solid-svg-icons';
 import './Login.css';
 import './QuoteManagement.css';
 import './Navbar.css';
 import config from './config';
 import QuoteEditModal from './QuoteEditModal';
 import NavbarComponent from './NavbarComponent';
+import QuoteTranslationComponent from './QuoteTranslationComponent'; 
 
 const QuoteManagement = () => {
   const [quoteText, setQuoteText] = useState('');
@@ -23,6 +24,7 @@ const QuoteManagement = () => {
   const [editedSecondaryText, setEditedSecondaryText] = useState(secondaryText);
   const [editedIsActive, setEditedIsActive] = useState(isActive);
   const [editedQuoteURL, setEditedQuoteURL] = useState('');
+  const [quoteTranslations, setQuoteTranslations] = useState([]);
   const authData = JSON.parse(localStorage.getItem('authData') || '{}');
 
 
@@ -49,9 +51,34 @@ const QuoteManagement = () => {
     fetchQuotes();
   }, [quoteEdits, authData.token]);
 
+  useEffect(() => {
+    console.log(quoteTranslations);
+  }, [quoteTranslations]);
+
   const handleLogout = () => {
     localStorage.removeItem('authData');
     window.location.reload();
+  };
+
+  const addTranslation = () => {
+    setQuoteTranslations(prevTranslations => [...prevTranslations, 
+      { primaryText: '', secondaryText: '', languageCode: 'es' }
+    ]);
+  };
+
+  const updateTranslation = (index, field, value) => {
+    const newTranslations = [...quoteTranslations];
+    newTranslations[index][field] = value;
+    setQuoteTranslations(newTranslations);
+    console.log(quoteTranslations);
+  };
+
+  const removeTranslation = (index) => {
+    setQuoteTranslations(prevTranslations => prevTranslations.filter((_, i) => i !== index));
+  };
+
+  const handleAddTranslationClick = () => {
+    addTranslation();
   };
 
   const handleSubmit = async (event) => {
@@ -73,14 +100,34 @@ const QuoteManagement = () => {
       });
 
       if (response.ok) {
+        const createdQuote = await response.json();
+        await Promise.all(
+          quoteTranslations.map(async (translation) => {
+            await fetch(`${authData.instanceUrl}/QuoteTranslation`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${authData.token}`,
+              },
+              body: JSON.stringify({
+                quoteId: createdQuote.id,
+                languageCode: translation.languageCode,
+                primaryText: translation.primaryText,
+                secondaryText: translation.secondaryText,
+                isDeleted: 0,
+              }),
+            });
+          })
+        );
         setQuoteText('');
         setSecondaryText('');
         setQuoteURL('');
         setIsActive(true);
+        setQuoteTranslations([]);
         fetchQuotes();
       }
     } catch (error) {
-      console.error('An error occurred while submitting the quote:', error);
+      console.error('An error occurred while submitting the form:', error);
     }
   };
 
@@ -276,6 +323,20 @@ const QuoteManagement = () => {
                 onChange={(e) => setQuoteURL(e.target.value)}
               />
             </Form.Group>
+            
+            {quoteTranslations.map((translation, i) => (
+              <QuoteTranslationComponent
+                key={i}  // Added a key prop here
+                index={i}
+                translation={translation}
+                updateTranslation={(i, field, value) => updateTranslation(i, field, value)}
+                removeTranslation={() => removeTranslation(i)}
+              />
+            ))}
+
+            <Button onClick={handleAddTranslationClick} variant="info">
+              <FontAwesomeIcon icon={faLanguage} /> Add Translation
+            </Button>
             <Form.Group>
               <Form.Check
                 type="switch"
@@ -308,7 +369,7 @@ const QuoteManagement = () => {
         </Row>
       </Container>
       {showModal && (
-        <QuoteEditModal
+        <QuoteEditModal className="hidden"
           quoteText={editedQuoteText ? editedQuoteText : ''}
           secondaryText={editedSecondaryText}
           quoteURL={editedQuoteURL}

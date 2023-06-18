@@ -34,4 +34,8 @@
     text-align: center;
     z-index: 9999;
   }
+
+  .multi-column{
+    display: flex;
+  }
   
