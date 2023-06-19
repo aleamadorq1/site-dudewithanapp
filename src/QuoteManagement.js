@@ -25,6 +25,7 @@ const QuoteManagement = () => {
   const [editedIsActive, setEditedIsActive] = useState(isActive);
   const [editedQuoteURL, setEditedQuoteURL] = useState('');
   const [quoteTranslations, setQuoteTranslations] = useState([]);
+  const [editedQuoteTranslations, setEditedQuoteTranslations] = useState([]);
   const authData = JSON.parse(localStorage.getItem('authData') || '{}');
 
 
@@ -52,7 +53,6 @@ const QuoteManagement = () => {
   }, [quoteEdits, authData.token]);
 
   useEffect(() => {
-    console.log(quoteTranslations);
   }, [quoteTranslations]);
 
   const handleLogout = () => {
@@ -66,19 +66,38 @@ const QuoteManagement = () => {
     ]);
   };
 
+  const addEditedTranslation = () => {
+    setEditedQuoteTranslations(prevTranslations => [...prevTranslations, 
+      { primaryText: '', secondaryText: '', languageCode: 'es' }
+    ]);
+  };
+
   const updateTranslation = (index, field, value) => {
     const newTranslations = [...quoteTranslations];
     newTranslations[index][field] = value;
     setQuoteTranslations(newTranslations);
-    console.log(quoteTranslations);
+  };
+
+  const updateEditedTranslation = (index, field, value) => {
+    const newTranslations = [...editedQuoteTranslations];
+    newTranslations[index][field] = value;
+    setEditedQuoteTranslations(newTranslations);
   };
 
   const removeTranslation = (index) => {
     setQuoteTranslations(prevTranslations => prevTranslations.filter((_, i) => i !== index));
   };
 
+  const removeEditedTranslation = (index) => {
+    setEditedQuoteTranslations(prevTranslations => prevTranslations.filter((_, i) => i !== index));
+  };
+
   const handleAddTranslationClick = () => {
     addTranslation();
+  };
+
+  const handleEditedAddTranslationClick = () => {
+    addEditedTranslation();
   };
 
   const handleSubmit = async (event) => {
@@ -142,8 +161,14 @@ const QuoteManagement = () => {
       });
 
       if (response.ok) {
+        const trans = await fetch(`${authData.instanceUrl}/QuoteTranslation/getByQuoteId?quoteId=${quote.id}`, {
+          headers: {
+            Authorization: `Bearer ${authData.token}`,
+          }
+          });
         const quoteData = await response.json();
 
+        setEditedQuoteTranslations(await trans.json())
         setShowModal(true);
         setEditedQuoteText(quoteData.quoteText);
         setEditedSecondaryText(quoteData.secondaryText);
@@ -173,6 +198,26 @@ const QuoteManagement = () => {
       });
 
       if (response.ok) {
+        const createdQuote = await response.json();
+
+        await Promise.all(
+          editedQuoteTranslations.map(async (translation) => {
+            await fetch(`${authData.instanceUrl}/QuoteTranslation`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${authData.token}`,
+              },
+              body: JSON.stringify({
+                quoteId: createdQuote.id,
+                languageCode: translation.languageCode,
+                primaryText: translation.primaryText,
+                secondaryText: translation.secondaryText,
+                isDeleted: 0,
+              }),
+            });
+          })
+        );
         setShowModal(false);
         setQuoteEdits((prevEdits) => prevEdits + 1);
       }
@@ -373,14 +418,17 @@ const QuoteManagement = () => {
           quoteText={editedQuoteText ? editedQuoteText : ''}
           secondaryText={editedSecondaryText}
           quoteURL={editedQuoteURL}
+          quoteTranslations={editedQuoteTranslations}
           isActive={editedIsActive}
           onCloseModal={handleCloseModal}
           onSave={handleSave}
-          config={config}
           fetchQuotes={fetchQuotes}
           setEditedQuoteText={setEditedQuoteText}
           setEditedSecondaryText={setEditedSecondaryText}
           setEditedQuoteURL={setEditedQuoteURL}
+          handleAddTranslationClick={addEditedTranslation}
+          updateTranslation={updateEditedTranslation}
+          removeTranslation={removeEditedTranslation}
         />
       )}
     </div>

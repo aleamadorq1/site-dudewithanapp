@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Modal, Button, Form, Card } from 'react-bootstrap';
 import './QuoteEdit.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlusSquare } from '@fortawesome/free-solid-svg-icons';
+import { faPlusSquare, faLanguage  } from '@fortawesome/free-solid-svg-icons';
+import QuoteTranslationComponent from './QuoteTranslationComponent'; 
 
-const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, isActive, onCloseModal, onSave, config, fetchQuotes }) => {
+const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, quoteTranslations, isActive, onCloseModal, onSave, fetchQuotes, handleAddTranslationClick, updateTranslation, removeTranslation }) => {
   const [modalVisible, setModalVisible] = useState(true);
   const [editedQuoteText, setEditedQuoteText] = useState(quoteText);
   const [editedSecondaryText, setEditedSecondaryText] = useState(secondaryText);
@@ -22,7 +23,7 @@ const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, isActive, onCloseM
 
   useEffect(() => {
     // Set focus on the quote text input when the modal opens
-    quoteTextInputRef.current.focus();
+    //quoteTextInputRef.current.focus();
 
     // Add event listener to handle clicks outside the modal
     const handleOutsideClick = (event) => {
@@ -85,6 +86,21 @@ const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, isActive, onCloseM
                   onChange={(e) => setEditedQuoteURL(e.target.value)} // Update editedQuoteURL state
                 />
               </Form.Group>
+
+              {quoteTranslations.map((translation, i) => (
+                <QuoteTranslationComponent
+                  key={i}  // Added a key prop here
+                  index={i}
+                  translation={translation}
+                  updateTranslation={(i, field, value) => updateTranslation(i, field, value)}
+                  removeTranslation={() => removeTranslation(i)}
+                />
+              ))}
+
+              <Button onClick={handleAddTranslationClick} variant="info">
+                <FontAwesomeIcon icon={faLanguage} /> Add Translation
+              </Button>
+
               <Form.Group>
                 <Form.Check
                   type="switch"
