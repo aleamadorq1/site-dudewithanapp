@@ -127,6 +127,7 @@
   .inline-button{
     padding: 10px !important;
     font-size: x-small !important;
+    height: 38px;
     border: none;
   }
   
