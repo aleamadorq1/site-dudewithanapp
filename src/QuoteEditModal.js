@@ -89,11 +89,11 @@ const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, quoteTranslations,
 
               {quoteTranslations.map((translation, i) => (
                 <QuoteTranslationComponent
-                  key={i}  // Added a key prop here
-                  index={i}
+                  key={translation.index}  // Added a key prop here
+                  index={translation.index}
                   translation={translation}
-                  updateTranslation={(i, field, value) => updateTranslation(i, field, value)}
-                  removeTranslation={() => removeTranslation(i)}
+                  updateTranslation={(i, field, value) => updateTranslation(translation.index, field, value)}
+                  removeTranslation={() => removeTranslation(translation.index)}
                 />
               ))}
 

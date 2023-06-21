@@ -3,6 +3,7 @@ import { Card, Form, Button, Container, Row, Col } from 'react-bootstrap';
 import { DataGrid } from '@mui/x-data-grid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlusSquare, faEdit, faTrash, faLanguage } from '@fortawesome/free-solid-svg-icons';
+import { v4 as uuidv4 } from 'uuid';
 import './Login.css';
 import './QuoteManagement.css';
 import './Navbar.css';
@@ -62,43 +63,46 @@ const QuoteManagement = () => {
 
   const addTranslation = () => {
     setQuoteTranslations(prevTranslations => [...prevTranslations, 
-      { primaryText: '', secondaryText: '', languageCode: 'es' }
+      { index: uuidv4(), primaryText: '', secondaryText: '', languageCode: '' }
     ]);
   };
 
   const addEditedTranslation = () => {
     setEditedQuoteTranslations(prevTranslations => [...prevTranslations, 
-      { primaryText: '', secondaryText: '', languageCode: 'es' }
+      { index: uuidv4(), primaryText: '', secondaryText: '', languageCode: '' }
     ]);
   };
 
   const updateTranslation = (index, field, value) => {
     const newTranslations = [...quoteTranslations];
-    newTranslations[index][field] = value;
+    const indexToUpdate = newTranslations.findIndex(translation => translation.index === index);
+    if (indexToUpdate !== -1) {
+      newTranslations[indexToUpdate][field] = value;
+    }
     setQuoteTranslations(newTranslations);
   };
 
   const updateEditedTranslation = (index, field, value) => {
     const newTranslations = [...editedQuoteTranslations];
-    newTranslations[index][field] = value;
+    const indexToUpdate = newTranslations.findIndex(translation => translation.index === index);
+    if (indexToUpdate !== -1) {
+      newTranslations[indexToUpdate][field] = value;
+    }
     setEditedQuoteTranslations(newTranslations);
   };
 
   const removeTranslation = (index) => {
-    setQuoteTranslations(prevTranslations => prevTranslations.filter((_, i) => i !== index));
+    setQuoteTranslations(prevTranslations => prevTranslations.filter(translation => translation.index !== index));
   };
 
   const removeEditedTranslation = (index) => {
-    setEditedQuoteTranslations(prevTranslations => prevTranslations.filter((_, i) => i !== index));
+    setEditedQuoteTranslations(prevTranslations => prevTranslations.filter(translation => translation.index !== index));
   };
 
   const handleAddTranslationClick = () => {
     addTranslation();
   };
 
-  const handleEditedAddTranslationClick = () => {
-    addEditedTranslation();
-  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -167,8 +171,15 @@ const QuoteManagement = () => {
           }
           });
         const quoteData = await response.json();
+        const transData = await trans.json()
 
-        setEditedQuoteTranslations(await trans.json())
+        transData.forEach(function(e) {
+          if (typeof e === "object") {
+            e["index"] = uuidv4();
+          }
+        });
+
+        setEditedQuoteTranslations(transData)
         setShowModal(true);
         setEditedQuoteText(quoteData.quoteText);
         setEditedSecondaryText(quoteData.secondaryText);
@@ -371,15 +382,15 @@ const QuoteManagement = () => {
             
             {quoteTranslations.map((translation, i) => (
               <QuoteTranslationComponent
-                key={i}  // Added a key prop here
-                index={i}
+                key={translation.index}  // Added a key prop here
+                index={translation.index}
                 translation={translation}
-                updateTranslation={(i, field, value) => updateTranslation(i, field, value)}
-                removeTranslation={() => removeTranslation(i)}
+                updateTranslation={(i, field, value) => updateTranslation(translation.index, field, value)}
+                removeTranslation={() => removeTranslation(translation.index)}
               />
             ))}
 
-            <Button onClick={handleAddTranslationClick} variant="info">
+            <Button onClick={handleAddTranslationClick} variant="info" className='inline-button'>
               <FontAwesomeIcon icon={faLanguage} /> Add Translation
             </Button>
             <Form.Group>
@@ -387,6 +398,7 @@ const QuoteManagement = () => {
                 type="switch"
                 id="isActiveSwitch"
                 label="Show in App"
+                
                 checked={isActive}
                 onChange={(e) => setIsActive(e.target.checked)}
               />

@@ -29,10 +29,10 @@ const QuoteTranslationComponent = ({ index, translation, updateTranslation, remo
             <Select
                 options={languageOptions}
                 className='quote-input'
+                onChange={(options) => handleChange("languageCode", options.value)}
                 defaultValue={languageOptions.find(opt => opt.value === translation.languageCode)}
-                onChange={(option) => handleChange("languageCode", option.value)}
             />
-            <Button className='inline-button' onClick={removeTranslation}>
+            <Button className='inline-button red' onClick={removeTranslation }>
                 <FontAwesomeIcon icon={faTrash} />
             </Button>
         </Form.Group>
