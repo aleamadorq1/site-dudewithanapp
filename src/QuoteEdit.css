@@ -12,10 +12,35 @@
   }
   
   .modal-content {
-    display: flex;
+    overflow-y: auto;
+    position: fixed;
     justify-content: center;
     align-items: center;
+    max-height: calc(100vh - 120px);
     z-index: 9999;
+  }
+
+  .quote-edit-modal .modal-dialog {
+    overflow-y: initial !important;
+  }
+  
+  .quote-edit-modal .modal-body {
+    max-height: calc(100vh - 120px); /* Adjust the height according to your layout */
+    overflow-y: auto;
+  }
+
+  .quote-edit-modal .modal-body::-webkit-scrollbar {
+    width: 8px; /* Width of the scrollbar */
+    margin-right: 8px; /* Adjust the margin to move the scrollbar to the right */
+  }
+  
+  .quote-edit-modal .modal-body::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.3); /* Color of the scrollbar thumb */
+    border-radius: 4px; /* Border radius of the scrollbar thumb */
+  }
+  
+  .quote-edit-modal .modal-body::-webkit-scrollbar-track {
+    background-color: transparent; /* Background color of the scrollbar track */
   }
   
   .modal-card {

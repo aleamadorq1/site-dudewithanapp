@@ -51,7 +51,7 @@ const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, quoteTranslations,
   };
 
   return (
-    <div className={`modal-background ${modalVisible ? 'visible' : ''}`}>
+    <div className={`modal-background quote-edit-modal ${modalVisible ? 'visible' : ''}`}>
       <div className="modal-content">
         <Card className="modal-card quote-widget">
           <Modal.Body>
