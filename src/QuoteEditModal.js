@@ -97,7 +97,7 @@ const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, quoteTranslations,
                 />
               ))}
 
-              <Button onClick={handleAddTranslationClick} variant="info">
+              <Button onClick={handleAddTranslationClick} variant="info" className='inline-button'>
                 <FontAwesomeIcon icon={faLanguage} /> Add Translation
               </Button>
 

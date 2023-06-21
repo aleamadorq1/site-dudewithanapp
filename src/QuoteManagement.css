@@ -5,6 +5,7 @@
   padding: 10px;
   margin-bottom: 5px;
   border-width: 1px;
+  border: none !important;
 }
 
 .quote-management-container {
@@ -119,16 +120,14 @@
   .quote-widget input {
     font-size: 1rem;
     padding: 10px;
-    border-radius: 5px;
-    border: none;
+    border-radius: 5px;    
     margin-bottom: 10px;
   }
 
   .inline-button{
     padding: 10px !important;
-    font-size: 1rem;
+    font-size: x-small !important;
     border: none;
-    background-color: #DE4343 !important;
   }
   
   .quote-widget button {
@@ -144,6 +143,13 @@
     border: #293246;
   }
 
+  .red{
+    background-color: #DE4343 !important;
+  }
+
+  .blue{
+    background-color: #394867;
+  }
 
   
   .quote-widget button:hover {
