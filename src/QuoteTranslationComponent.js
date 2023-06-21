@@ -19,7 +19,8 @@ const QuoteTranslationComponent = ({ index, translation, updateTranslation, remo
     { value: 'it', label: '🇮🇹 Italian' },
     { value: 'ja', label: '🇯🇵 Japanese' },
     { value: 'zh', label: '🇨🇳 Chinese' }, // Note: This is for Simplified Chinese
-    { value: 'ko', label: '🇰🇷 Korean' }
+    { value: 'ko', label: '🇰🇷 Korean' },
+    { value: 'ru', label: '🇷🇺 Russian' }
   ];
   
   return (
