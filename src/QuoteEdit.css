@@ -16,7 +16,7 @@
     position: fixed;
     justify-content: center;
     align-items: center;
-    max-height: calc(100vh - 120px);
+    max-height: calc(100vh - 150px);
     z-index: 9999;
   }
 
@@ -25,7 +25,7 @@
   }
   
   .quote-edit-modal .modal-body {
-    max-height: calc(100vh - 120px); /* Adjust the height according to your layout */
+    max-height: calc(100vh - 150px); /* Adjust the height according to your layout */
     overflow-y: auto;
   }
 
