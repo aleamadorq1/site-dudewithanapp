@@ -62,5 +62,6 @@
 
   .multi-column{
     display: flex;
+    align-items: center;
   }
   

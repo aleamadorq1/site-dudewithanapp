@@ -5,12 +5,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlusSquare, faLanguage  } from '@fortawesome/free-solid-svg-icons';
 import QuoteTranslationComponent from './QuoteTranslationComponent'; 
 
-const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, quoteTranslations, isActive, onCloseModal, onSave, fetchQuotes, handleAddTranslationClick, updateTranslation, removeTranslation }) => {
+const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, quoteTranslations, isActive, isCSV, onCloseModal, onSave, fetchQuotes, handleAddTranslationClick, updateTranslation, removeTranslation }) => {
   const [modalVisible, setModalVisible] = useState(true);
   const [editedQuoteText, setEditedQuoteText] = useState(quoteText);
   const [editedSecondaryText, setEditedSecondaryText] = useState(secondaryText);
   const [editedQuoteURL, setEditedQuoteURL] = useState(quoteURL);
   const [editedisActive, setEditedIsActive] = useState(isActive);
+  const [editedisCSV, setEditedIsCSV] = useState(isCSV);
   const quoteTextInputRef = useRef(null);
 
   useEffect(() => {
@@ -44,7 +45,8 @@ const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, quoteTranslations,
       quoteText: editedQuoteText,
       secondaryText: editedSecondaryText,
       quoteURL: editedQuoteURL,
-      isActive: editedisActive?1:0
+      isActive: editedisActive?1:0,
+      isCSV: editedisCSV?1:0
     });
     setModalVisible(false);
     fetchQuotes(); // Call fetchQuotes function passed as a prop
@@ -87,7 +89,7 @@ const QuoteEditModal = ({ quoteText, secondaryText, quoteURL, quoteTranslations,
                 />
               </Form.Group>
 
-              {quoteTranslations.map((translation, i) => (
+              {isCSV == false && quoteTranslations.map((translation, i) => (
                 <QuoteTranslationComponent
                   key={translation.index}  // Added a key prop here
                   index={translation.index}

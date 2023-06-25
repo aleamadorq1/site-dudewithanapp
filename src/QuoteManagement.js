@@ -2,21 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Card, Form, Button, Container, Row, Col } from 'react-bootstrap';
 import { DataGrid } from '@mui/x-data-grid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlusSquare, faEdit, faTrash, faLanguage } from '@fortawesome/free-solid-svg-icons';
+import { faPlusSquare, faEdit, faTrash, faLanguage, faL } from '@fortawesome/free-solid-svg-icons';
 import { v4 as uuidv4 } from 'uuid';
 import './Login.css';
 import './QuoteManagement.css';
 import './Navbar.css';
-import config from './config';
 import QuoteEditModal from './QuoteEditModal';
 import NavbarComponent from './NavbarComponent';
 import QuoteTranslationComponent from './QuoteTranslationComponent'; 
+import FileSummaryComponent from './FileSummaryComponent';
 
 const QuoteManagement = () => {
   const [quoteText, setQuoteText] = useState('');
   const [secondaryText, setSecondaryText] = useState('');
   const [quoteURL, setQuoteURL] = useState('');
   const [isActive, setIsActive] = useState(true);
+  const [isCSV, setIsCSV] = useState(false);
   const [quotes, setQuotes] = useState([]);
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -24,8 +25,10 @@ const QuoteManagement = () => {
   const [editedQuoteText, setEditedQuoteText] = useState(quoteText);
   const [editedSecondaryText, setEditedSecondaryText] = useState(secondaryText);
   const [editedIsActive, setEditedIsActive] = useState(isActive);
+  const [editedIsCSV, setEditedIsCSV] = useState(isCSV);
   const [editedQuoteURL, setEditedQuoteURL] = useState('');
   const [quoteTranslations, setQuoteTranslations] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [editedQuoteTranslations, setEditedQuoteTranslations] = useState([]);
   const authData = JSON.parse(localStorage.getItem('authData') || '{}');
 
@@ -103,6 +106,12 @@ const QuoteManagement = () => {
     addTranslation();
   };
 
+  const handleRemoveFile = async () => {
+    setSelectedFile(null);
+    setQuoteTranslations([]);
+    setIsCSV(false);
+  }
+
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -119,36 +128,41 @@ const QuoteManagement = () => {
           secondaryText: secondaryText,
           url: quoteURL,
           isActive: isActive ? 1 : 0,
+          isCSV: isCSV ? 1 : 0
         }),
       });
 
-      if (response.ok) {
+      if  (response.ok)
+      {
         const createdQuote = await response.json();
-        await Promise.all(
-          quoteTranslations.map(async (translation) => {
-            await fetch(`${authData.instanceUrl}/QuoteTranslation`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${authData.token}`,
-              },
-              body: JSON.stringify({
-                quoteId: createdQuote.id,
-                languageCode: translation.languageCode,
-                primaryText: translation.primaryText,
-                secondaryText: translation.secondaryText,
-                isDeleted: 0,
-              }),
-            });
-          })
-        );
-        setQuoteText('');
-        setSecondaryText('');
-        setQuoteURL('');
-        setIsActive(true);
-        setQuoteTranslations([]);
-        fetchQuotes();
+
+        // Construct an array of translations
+        const translations = quoteTranslations.map((translation) => ({
+          quoteId: createdQuote.id,
+          languageCode: translation.languageCode,
+          primaryText: translation.primaryText,
+          secondaryText: translation.secondaryText,
+          isDeleted: 0,
+        }));
+      
+        // Send the translations array to the endpoint
+        await fetch(`${authData.instanceUrl}/QuoteTranslation/csv`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${authData.token}`,
+          },
+          body: JSON.stringify(translations),
+        });
       }
+      setQuoteText('');
+      setSecondaryText('');
+      setQuoteURL('');
+      setIsActive(true);
+      setIsCSV(false);
+      setQuoteTranslations([]);
+      setSelectedFile(null);
+      fetchQuotes();
     } catch (error) {
       console.error('An error occurred while submitting the form:', error);
     }
@@ -163,29 +177,32 @@ const QuoteManagement = () => {
           Authorization: `Bearer ${authData.token}`,
         },
       });
+      const quoteData = await response.json();
+      var transData = [];
 
-      if (response.ok) {
+      if (response.ok && quoteData.isCSV != 1) {
         const trans = await fetch(`${authData.instanceUrl}/QuoteTranslation/getByQuoteId?quoteId=${quote.id}`, {
           headers: {
             Authorization: `Bearer ${authData.token}`,
           }
           });
-        const quoteData = await response.json();
-        const transData = await trans.json()
+        
+        transData = await trans.json()
 
         transData.forEach(function(e) {
           if (typeof e === "object") {
             e["index"] = uuidv4();
           }
         });
-
-        setEditedQuoteTranslations(transData)
-        setShowModal(true);
-        setEditedQuoteText(quoteData.quoteText);
-        setEditedSecondaryText(quoteData.secondaryText);
-        setEditedQuoteURL(quoteData.url);
-        setEditedIsActive(quoteData.isActive);
       }
+
+      setEditedQuoteTranslations(transData)
+      setShowModal(true);
+      setEditedQuoteText(quoteData.quoteText);
+      setEditedSecondaryText(quoteData.secondaryText);
+      setEditedQuoteURL(quoteData.url);
+      setEditedIsActive(quoteData.isActive);
+      setEditedIsCSV(quoteData.isCSV);
     } catch (error) {
       console.error('An error occurred while fetching the quote for editing:', error);
     }
@@ -205,10 +222,11 @@ const QuoteManagement = () => {
           secondaryText: event.secondaryText,
           url: event.quoteURL,
           isActive: event.isActive,
+          isCSV: editedIsCSV
         }),
       });
 
-      if (response.ok) {
+      if (response.ok && editedIsCSV != 1) {
         const createdQuote = await response.json();
 
         await Promise.all(
@@ -229,9 +247,9 @@ const QuoteManagement = () => {
             });
           })
         );
-        setShowModal(false);
-        setQuoteEdits((prevEdits) => prevEdits + 1);
       }
+      setShowModal(false);
+      setQuoteEdits((prevEdits) => prevEdits + 1);
     } catch (error) {
       console.error('An error occurred while saving the quote:', error);
     }
@@ -262,6 +280,12 @@ const QuoteManagement = () => {
 
   const handleRowClick = (params) => {
     setSelectedQuote(params.row);
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    setSelectedFile(file);
+    setIsCSV(true);
   };
 
   const formattedQuotes = quotes.map((quote) => {
@@ -380,7 +404,7 @@ const QuoteManagement = () => {
               />
             </Form.Group>
             
-            {quoteTranslations.map((translation, i) => (
+            {isCSV == false && quoteTranslations.map((translation, i) => (
               <QuoteTranslationComponent
                 key={translation.index}  // Added a key prop here
                 index={translation.index}
@@ -389,10 +413,18 @@ const QuoteManagement = () => {
                 removeTranslation={() => removeTranslation(translation.index)}
               />
             ))}
-
-            <Button onClick={handleAddTranslationClick} variant="info" className='inline-button'>
-              <FontAwesomeIcon icon={faLanguage} /> Add Translation
-            </Button>
+            <Form.Group controlId="formFile" className='centered-inline-group'>
+              <Button onClick={handleAddTranslationClick} variant="info" className='inline-group-button inline-button golden'>
+                <FontAwesomeIcon icon={faLanguage} /> Add Translation
+              </Button>
+              <Form.Control type="file" className='inline-group-file' onChange={(e) => handleFileChange(e)} />
+            </Form.Group>
+            {selectedFile && <FileSummaryComponent 
+                                  file={selectedFile} 
+                                  setQuoteText={setQuoteText}
+                                  setSecondaryText={setSecondaryText}
+                                  setQuoteTranslations={setQuoteTranslations} 
+                                  handleRemoveFile={handleRemoveFile}/>}
             <Form.Group>
               <Form.Check
                 type="switch"
@@ -403,7 +435,7 @@ const QuoteManagement = () => {
                 onChange={(e) => setIsActive(e.target.checked)}
               />
             </Form.Group>
-            <Button type="submit" variant="success">
+            <Button type="submit" variant="success" className='blue'>
               <FontAwesomeIcon icon={faPlusSquare} /> Submit Quote
             </Button>
           </Form>
@@ -432,6 +464,7 @@ const QuoteManagement = () => {
           quoteURL={editedQuoteURL}
           quoteTranslations={editedQuoteTranslations}
           isActive={editedIsActive}
+          isCSV={editedIsCSV}
           onCloseModal={handleCloseModal}
           onSave={handleSave}
           fetchQuotes={fetchQuotes}

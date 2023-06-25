@@ -128,8 +128,10 @@
 
   .inline-button{
     padding: 10px !important;
+    margin: 0px;
     font-size: x-small !important;
     height: 38px;
+    margin-bottom: 5px;
     border: none;
   }
   
@@ -137,7 +139,7 @@
     font-size: 1rem;
     padding: 10px 20px;
     border-radius: 5px;
-    margin: 10px;
+    
     border: none;
     background-color: #394867;
     color: #fff;
@@ -152,6 +154,10 @@
 
   .blue{
     background-color: #394867;
+  }
+
+  .golden {
+    background-color:rgba(78, 66, 46, 0.5) !important;
   }
 
   
@@ -226,3 +232,66 @@
     color: rgb(187, 174, 138);
   }
 
+  input::file-selector-button {
+    background-color:rgba(78, 66, 46, 0.5) !important;
+    color: white;
+    height: 33px;
+    padding: 10px !important;
+    font-size: x-small !important;
+    border-radius: 5px;
+    border: none;
+  }
+
+  .centered-inline-group{
+    display: flex;
+    align-items: center;
+    margin-left: 8px;
+    font-size: x-small !important;
+  }
+
+  .inline-group{
+    width: 100%;
+    display: flex;
+    margin: auto;
+    justify-content: center;
+    align-items: top;
+    font-size: x-small !important;
+  }
+
+  .inline-group-button{
+    padding: 8px !important;
+    margin: 0px;
+    font-size: x-small !important;
+    min-width: 110px;
+    height: 33px;
+    margin-bottom: 10px;
+    border: none;
+  }
+
+  .inline-group-button-icon{
+    padding: 10px !important;
+    margin-left: 10px;
+    margin-right: 10px;
+    font-size: x-small !important;
+    width: 30px;
+    height: 33px;
+    margin-top: 7px;
+    border: none;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .inline-group-file{
+    font-size: x-small !important;
+    max-width: 180px;
+  }
+
+.inline-info {
+  background-color: rgba(78, 66, 46, 0.2);
+  color: white;
+  font-size: small;
+  padding: 5px;
+  border-radius: 5px;
+  margin-top: 10px;
+  align-items: center;
+}
